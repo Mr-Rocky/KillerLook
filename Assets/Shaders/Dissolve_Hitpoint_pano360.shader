@@ -1,29 +1,4 @@
-﻿// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-/*
-Copyright (c) 2015 Kyle Halladay
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
-Shader "Dissolve/Dissolve Origin Point" 
+Shader "Dissolve/Dissolve Origin Point Pano360"
 {
 	Properties 
 	{
@@ -34,10 +9,41 @@ Shader "Dissolve/Dissolve Origin Point"
 		_HitPos("Position", Vector) = (0.0,0.0,0.0,0.0)
 		_GradientAdjust ("Gradient", Range(0.1,10.0)) = 10.0
 		_LargestVal ("Largest Value", float) = 1.0
+		_Color ("Main Color", Color) = (1,1,1,0.5)
 	}
 	SubShader 
 	{
 		Tags {"Queue" = "Transparent"}
+		Tags { "RenderType" = "Opaque" }
+
+        //This is used to print the texture inside of the sphere
+        Cull Front
+        CGPROGRAM
+        #pragma surface surf SimpleLambert
+        half4 LightingSimpleLambert (SurfaceOutput s, half3 lightDir, half atten)
+        {
+           half4 c;
+           c.rgb = s.Albedo;
+           return c;
+        }
+      
+        sampler2D _MainTex;
+        struct Input
+        {
+           float2 uv_MainTex;
+           float4 myColor : COLOR;
+        };
+ 
+        fixed3 _Color;
+        void surf (Input IN, inout SurfaceOutput o)
+        {
+           //This is used to mirror the image correctly when printing it inside of the sphere
+		   IN.uv_MainTex.x = 1 - IN.uv_MainTex.x;
+           fixed3 result = tex2D(_MainTex, IN.uv_MainTex)*_Color;
+           o.Albedo = result.rgb;
+           o.Alpha = 1;
+        }
+		ENDCG
 		
 		Pass
 		{
@@ -100,5 +106,6 @@ Shader "Dissolve/Dissolve Origin Point"
 
 			ENDCG
 		}
-	} 
+	}
+	Fallback "Diffuse"
 }

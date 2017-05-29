@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-Shader "KH/Dissolve/Dissolve Gradient" 
+Shader "Dissolve/Dissolve Gradient" 
 {
 	Properties 
 	{
