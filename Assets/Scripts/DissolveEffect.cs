@@ -38,6 +38,7 @@ public class DissolveEffect : MonoBehaviour {
 
     public void TriggerDissolve(Vector3 hitPoint)
     {
+        Debug.Log("sm v desolvu");
         _value = 1.0f;
         _dissolveMaterial.SetVector("_HitPos", (new Vector4(hitPoint.x, hitPoint.y, hitPoint.z, 1.0f)));
         _isRunning = true;
