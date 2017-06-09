@@ -2,11 +2,11 @@
 Project for IOI course.
 
 
-# User manual
+## User manual
 
-## Install build apk on android phone
+### Install build apk on android phone
 
-### Option 1: manual install
+#### Option 1: manual install
 
 1. In map "path_to_project/Builds" find apk you wish to install (file_name.apk)
 2. Connect your phone to computer
@@ -15,7 +15,7 @@ Project for IOI course.
 5. Install apk
 6. Run aplication
 
-### Option 2: Install with interface
+#### Option 2: Install with interface
 
 1. Connect your phone to computer
 2. On your computer open program interface to search throu phone
@@ -24,7 +24,7 @@ Project for IOI course.
 5. In pop up window manouever to "path_to_project/Builds" folder and select apk
 5. Run aplication on your phone
 
-## Build apk for android
+### Build apk for android
 
 1. In Unity select "File/Build settings"
 2. Select scene you wish to build
