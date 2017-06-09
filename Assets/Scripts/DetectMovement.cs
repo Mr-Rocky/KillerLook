@@ -8,12 +8,18 @@ public class DetectMovement : MonoBehaviour {
     public float allowedMovementError;
     public float waitTime;
     public float speed;
+    [HideInInspector]
+    public bool gameOn;
 
     private Camera cam;
     private Transform playerTransform;
     private Quaternion previousRotation;
     private float waittingTime;
     private float radiusOfCircle;
+    // for clearing fire ring
+    private bool didHit;
+    private Vector2 priviousPoint;
+    private Texture2D priviousTex;
 
     // Use this for initialization
     void Start () {
@@ -29,6 +35,8 @@ public class DetectMovement : MonoBehaviour {
             speed = 1.0f;
         waittingTime = waitTime;
         radiusOfCircle = 0.0f;
+        didHit = false;
+        gameOn = false;
 	}
 	
 	// Update is called once per frame
@@ -40,9 +48,8 @@ public class DetectMovement : MonoBehaviour {
         if (changeInRotation > allowedMovementError)
         {
             waittingTime = waitTime;
-            radiusOfCircle = 0.0f;
         }
-        else
+        else if (gameOn)
         {
             waittingTime -= Time.deltaTime;
         }
@@ -55,7 +62,7 @@ public class DetectMovement : MonoBehaviour {
         {
             RaycastHit hitInfo;
 
-            if (Physics.Raycast((playerCamara.transform.position + playerCamara.transform.forward*1000), -playerCamara.transform.forward, out hitInfo))
+            if (Physics.Raycast((playerCamara.transform.position + playerCamara.transform.forward*500), -playerCamara.transform.forward, out hitInfo))
             {
                 Renderer rend = hitInfo.transform.GetComponent<Renderer>();
                 MeshCollider meshCollider = hitInfo.collider as MeshCollider;
@@ -72,10 +79,18 @@ public class DetectMovement : MonoBehaviour {
                 pixelUV.y *= tex.height;
 
                 radiusOfCircle += speed;
-                drawCircleFull(pixelUV, tex, (int)radiusOfCircle);
+                drawCircleFull(pixelUV, tex, (int)radiusOfCircle - 2);
+                drawCircle(pixelUV, tex, Color.red, (int)radiusOfCircle - 1);
                 drawCircle(pixelUV, tex, Color.yellow, (int)radiusOfCircle);
-                drawCircle(pixelUV, tex, Color.red, (int)radiusOfCircle-1);
+                didHit = true;
+                priviousPoint = pixelUV;
+                priviousTex = tex;
             }
+        }
+        else if (didHit)
+        {
+            drawCircleFull(priviousPoint, priviousTex, (int)radiusOfCircle);
+            radiusOfCircle = 0.0f;
         }
     }
 
@@ -128,7 +143,7 @@ public class DetectMovement : MonoBehaviour {
             for (int j = -radius; j < radius; j++)
             {
                 float distance = Mathf.Sqrt(i * i + j * j);
-                if (distance < (radius - 2) && distance >= Mathf.Min(0, radius - 3))
+                if (distance < radius && distance >= Mathf.Min(0, radius - 2))
                 {
                     int x = (int)point.x + i;
                     int y = (int)point.y + j;
