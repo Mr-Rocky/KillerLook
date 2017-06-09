@@ -2,9 +2,9 @@
 Project for IOI course.
 
 
-#User manual
+# User manual
 
-##Install build apk on android phone
+## Install build apk on android phone
 
 ### Option 1: manual install
 
