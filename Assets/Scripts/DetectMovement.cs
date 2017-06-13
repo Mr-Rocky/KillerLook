@@ -5,11 +5,13 @@ using UnityEngine;
 public class DetectMovement : MonoBehaviour {
 
     public GameObject playerCamara;
+    public AudioSource audioFire;
     public float allowedMovementError;
     public float waitTime;
     public float speed;
+    public float alpha;
     [HideInInspector]
-    public bool gameOn;
+    public bool gameOn = true;
 
     private Camera cam;
     private Transform playerTransform;
@@ -36,7 +38,6 @@ public class DetectMovement : MonoBehaviour {
         waittingTime = waitTime;
         radiusOfCircle = 0.0f;
         didHit = false;
-        gameOn = false;
 	}
 	
 	// Update is called once per frame
@@ -82,7 +83,12 @@ public class DetectMovement : MonoBehaviour {
                 drawCircleFull(pixelUV, tex, (int)radiusOfCircle - 2);
                 drawCircle(pixelUV, tex, Color.red, (int)radiusOfCircle - 1);
                 drawCircle(pixelUV, tex, Color.yellow, (int)radiusOfCircle);
-                didHit = true;
+                //transparencyCircle(pixelUV, tex, radiusOfCircle);
+                if (didHit)
+                {
+                    audioFire.Play();
+                    didHit = true;
+                }
                 priviousPoint = pixelUV;
                 priviousTex = tex;
             }
@@ -91,6 +97,7 @@ public class DetectMovement : MonoBehaviour {
         {
             drawCircleFull(priviousPoint, priviousTex, (int)radiusOfCircle);
             radiusOfCircle = 0.0f;
+            audioFire.Stop();
         }
     }
 
@@ -148,6 +155,30 @@ public class DetectMovement : MonoBehaviour {
                     int x = (int)point.x + i;
                     int y = (int)point.y + j;
                     tex.SetPixel(x, y, ringColor);
+                }
+            }
+        }
+
+        tex.Apply();
+    }
+
+    void transparencyCircle(Vector2 point, Texture2D tex, float radius)
+    {
+        int radiusInt = (int)radius;
+        for (int i = -radiusInt; i < radiusInt; i++)
+        {
+            for (int j = -radiusInt; j < radiusInt; j++)
+            {
+                float distance = Mathf.Sqrt(i * i + j * j);
+                
+                if (distance < radius)
+                {
+                    int x = (int)point.x + i;
+                    int y = (int)point.y + j;
+                    Color pixelColor = tex.GetPixel(x, y);
+                    //pixelColor.a *= (1 - distance / radius);
+                    pixelColor.a *= alpha;
+                    tex.SetPixel(x, y, pixelColor);
                 }
             }
         }
