@@ -6,10 +6,16 @@ public class DetectMovement : MonoBehaviour {
 
     public GameObject playerCamara;
     public AudioSource audioFire;
+    [Tooltip("Allowance of movement while staring.")]
     public float allowedMovementError;
+    [Tooltip("Time that is needed to stare for activation of event.")]
     public float waitTime;
+    [Tooltip("Rate of increasing infected area.")]
     public float speed;
+    [Tooltip("Value for multiplying transperency.")]
     public float alpha;
+    [Tooltip("Chance of fire to procede to next pixel.")]
+    public float chanceOfFire;
     [HideInInspector]
     public bool gameOn = true;
 
@@ -35,12 +41,14 @@ public class DetectMovement : MonoBehaviour {
             waitTime = 1.0f;
         if (float.IsNaN(speed))
             speed = 1.0f;
+        if (float.IsNaN(chanceOfFire))
+            speed = 0.25f;
         waittingTime = waitTime;
         radiusOfCircle = 0.0f;
         didHit = false;
 	}
 	
-	// Update is called once per frame
+
 	void Update () {
         // Check if player moved
         // if not increse waiting time
@@ -80,12 +88,14 @@ public class DetectMovement : MonoBehaviour {
                 pixelUV.y *= tex.height;
 
                 radiusOfCircle += speed;
-                drawCircleFull(pixelUV, tex, (int)radiusOfCircle - 2);
-                drawCircle(pixelUV, tex, Color.red, (int)radiusOfCircle - 1);
-                drawCircle(pixelUV, tex, Color.yellow, (int)radiusOfCircle);
+                //drawCircleFull(pixelUV, tex, (int)radiusOfCircle - 2);
+                //drawCircle(pixelUV, tex, Color.red, (int)radiusOfCircle - 1);
+                //drawCircle(pixelUV, tex, Color.yellow, (int)radiusOfCircle);
+                burningArea(pixelUV, tex, radiusOfCircle);
                 //transparencyCircle(pixelUV, tex, radiusOfCircle);
-                if (didHit)
+                if (!didHit)
                 {
+                    audioFire.time = 1.9f;
                     audioFire.Play();
                     didHit = true;
                 }
@@ -95,7 +105,9 @@ public class DetectMovement : MonoBehaviour {
         }
         else if (didHit)
         {
-            drawCircleFull(priviousPoint, priviousTex, (int)radiusOfCircle);
+            didHit = false;
+            //drawCircleFull(priviousPoint, priviousTex, (int)radiusOfCircle);
+            burningAreaClear(priviousPoint, priviousTex, radiusOfCircle);
             radiusOfCircle = 0.0f;
             audioFire.Stop();
         }
@@ -159,6 +171,105 @@ public class DetectMovement : MonoBehaviour {
             }
         }
 
+        tex.Apply();
+    }
+
+    void burningArea(Vector2 point, Texture2D tex, float radius)
+    {
+        if (radius < 2 * speed)
+        {
+            tex.SetPixel((int)point.x, (int)point.y, Color.yellow);
+        }
+        else
+        {
+            int radiusInt = (int)radius;
+            Texture2D tmpTex = tex;
+
+            for (int i = -radiusInt; i <= radiusInt; i++)
+            {
+                for (int j = -radiusInt; j <= radiusInt; j++)
+                {
+                    // for speed up of a program
+                    /*if ((Mathf.Abs(i) < (radius / 2)) && (Mathf.Abs(j) < (radius / 2)))
+                    {
+                        Debug.Log("i and j lower then half of radius \n i: "+i+" j: "+j);
+                        continue;
+                    }*/
+
+                    int x = (int)point.x + i;
+                    int y = (int)point.y + j;
+                    Color pixelColor = tex.GetPixel(x, y);
+
+                    if (pixelColor == Color.clear)
+                        continue;
+                    else if (pixelColor == Color.red)
+                    {
+                        if (Random.value < chanceOfFire)
+                        {
+                            tmpTex.SetPixel(x, y, Color.clear);
+                            flameOn(x, y, tmpTex);
+                        }
+                    }
+                    else if (pixelColor == Color.yellow)
+                    {
+                        if (Random.value < chanceOfFire)
+                        {
+                            tmpTex.SetPixel(x, y, Color.red);
+                            flameOn(x, y, tmpTex);
+                        }
+                    }
+                }
+            }
+            tex = tmpTex;
+        }
+        tex.Apply();
+    }
+
+    void flameOn(int x, int y, Texture2D tex)
+    {
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                if (i == 0 && j == 0)
+                    continue;
+
+                Color pixelColor = tex.GetPixel(x + i, y + j);
+                if (pixelColor == Color.clear)
+                    continue;
+                else if (pixelColor == Color.yellow)
+                {
+                    tex.SetPixel(x + i, y + j, Color.red);
+                }
+                else if (pixelColor == Color.red)
+                {
+                    tex.SetPixel(x + i, y + j, Color.clear);
+                }
+                else
+                {
+                    tex.SetPixel(x + i, y + j, Color.yellow);
+                }
+            }
+        }
+        //tex.Apply();
+    }
+
+    void burningAreaClear(Vector2 point, Texture2D tex, float radius)
+    {
+        int radiusInt = (int)radius;
+
+        for (int i = -radiusInt; i <= radiusInt; i++)
+        {
+            for (int j = -radiusInt; j <= radiusInt; j++)
+            {
+                int x = (int)point.x + i;
+                int y = (int)point.y + j;
+                Color pixelColor = tex.GetPixel(x, y);
+
+                if (pixelColor == Color.red || pixelColor == Color.yellow)
+                    tex.SetPixel(x, y, Color.clear);
+            }
+        }
         tex.Apply();
     }
 
