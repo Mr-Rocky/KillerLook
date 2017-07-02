@@ -91,12 +91,12 @@ public class DetectMovement : MonoBehaviour {
                 //drawCircleFull(pixelUV, tex, (int)radiusOfCircle - 2);
                 //drawCircle(pixelUV, tex, Color.red, (int)radiusOfCircle - 1);
                 //drawCircle(pixelUV, tex, Color.yellow, (int)radiusOfCircle);
-                burningArea(pixelUV, tex, radiusOfCircle);
-                //transparencyCircle(pixelUV, tex, radiusOfCircle);
+                //burningArea(pixelUV, tex, radiusOfCircle);
+                transparencyCircle(pixelUV, tex, radiusOfCircle);
                 if (!didHit)
                 {
-                    audioFire.time = 1.9f;
-                    audioFire.Play();
+                    //audioFire.time = 1.9f;
+                    //audioFire.Play();
                     didHit = true;
                 }
                 priviousPoint = pixelUV;
@@ -107,9 +107,9 @@ public class DetectMovement : MonoBehaviour {
         {
             didHit = false;
             //drawCircleFull(priviousPoint, priviousTex, (int)radiusOfCircle);
-            burningAreaClear(priviousPoint, priviousTex, radiusOfCircle);
+            //burningAreaClear(priviousPoint, priviousTex, radiusOfCircle);
             radiusOfCircle = 0.0f;
-            audioFire.Stop();
+            //audioFire.Stop();
         }
     }
 
